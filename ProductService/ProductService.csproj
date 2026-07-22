@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- User Secrets -->
+		<UserSecretsId>b4b74f27-3d45-44b8-a2ed-84ef40a0a1ef</UserSecretsId>
+
+		<!-- Docker Target -->
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Asp.Versioning.Mvc" Version="8.0.0" />
+		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
+
+		<PackageReference Include="Hangfire.SqlServer" Version="1.8.14" />
+
+		<PackageReference Include="MediatR" Version="14.2.0" />
+
+		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.16" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+
+		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+
+		<PackageReference Include="StackExchange.Redis" Version="3.0.17" />
+
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Migrations\" />
+	</ItemGroup>
+
+</Project>

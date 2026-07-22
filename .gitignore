@@ -1,0 +1,29 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# Logs
+Logs/
+*.log
+
+# SQL Server
+*.mdf
+*.ldf
+
+# Docker
+docker-compose.override.yml
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
