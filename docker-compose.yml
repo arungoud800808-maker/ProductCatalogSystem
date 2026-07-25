@@ -2,20 +2,6 @@ version: '3.9'
 
 services:
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
-
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Password@123"
-
-    ports:
-      - "1433:1433"
-
-  
-    restart: unless-stopped
-
   redis:
     image: redis:latest
     container_name: redis
@@ -36,7 +22,6 @@ services:
     container_name: productservice
 
     depends_on:
-      - sqlserver
       - redis
 
     ports:
@@ -46,12 +31,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
 
-      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=ProductCatalogDB;User Id=sa;Password=Password@123;TrustServerCertificate=True;Encrypt=False"
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=ProductCatalogDB;User Id=sa;Password=Password@123;TrustServerCertificate=True;Encrypt=False"
 
-      ConnectionStrings__Redis: "redis:6379"
+      Redis__ConnectionString: "redis:6379"
 
     restart: unless-stopped
 
 volumes:
-  sql_data:
   redis_data:

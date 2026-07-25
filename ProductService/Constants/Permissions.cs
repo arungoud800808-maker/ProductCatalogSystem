@@ -32,5 +32,6 @@
 
         // Audit
         public const string AuditView = "Audit.View";
+        public const string SwaggerView = "Swagger.View";
     }
 }

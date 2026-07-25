@@ -76,4 +76,13 @@ public class GenericRepository<T> : IGenericRepository<T>
 
         return await query.ToListAsync();
     }
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _dbSet.FindAsync(id) != null;
+    }
+
+    public async Task<int> CountAsync()
+    {
+        return await _dbSet.CountAsync();
+    }
 }

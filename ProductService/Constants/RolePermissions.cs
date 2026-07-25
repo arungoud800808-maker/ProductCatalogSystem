@@ -13,6 +13,7 @@ namespace ProductService.Constants
                     Permissions.ProductCreate,
                     Permissions.ProductUpdate,
                     Permissions.ProductDelete,
+                    Permissions.SwaggerView,
 
                     Permissions.CategoryView,
                     Permissions.CategoryCreate,

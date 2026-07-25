@@ -11,8 +11,6 @@ public class UnitOfWork : IUnitOfWork
 
     private readonly ProductDbContext _context;
 
-    public ProductDbContext Context => _context;
-
     public IProductRepository Products { get; }
 
     public ICategoryRepository Categories { get; }
@@ -87,5 +85,21 @@ public class UnitOfWork : IUnitOfWork
     public void Dispose()
     {
         _context.Dispose();
+    }
+    public async Task ExecuteInTransactionAsync(Func<Task> operation)
+    {
+        await BeginTransactionAsync();
+
+        try
+        {
+            await operation();
+
+            await CommitTransactionAsync();
+        }
+        catch
+        {
+            await RollbackTransactionAsync();
+            throw;
+        }
     }
 }

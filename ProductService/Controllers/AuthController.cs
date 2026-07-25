@@ -169,7 +169,7 @@ public class AuthController : ControllerBase
     HttpContext.Connection.RemoteIpAddress?.ToString());
         return Ok(new AuthResponseDto
         {
-            Token = token,
+            AccessToken = token,
             RefreshToken = refreshToken,
             Email = user.Email,
             Role = user.Role,
@@ -217,50 +217,57 @@ public class AuthController : ControllerBase
         });
     }
 
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh(RefreshTokenRequestDto request)
+    public async Task<IActionResult> Refresh(
+     RefreshTokenRequestDto request)
     {
-        var principal = _jwtService.GetPrincipalFromExpiredToken(request.Token);
+        var principal =
+            _jwtService.GetPrincipalFromExpiredToken(request.Token);
+
+        if (principal == null)
+            return Unauthorized("Invalid Access Token.");
 
         var email =
-     User.FindFirst(ClaimTypes.Email)?.Value ??
-     User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
-        if (email == null)
-            return BadRequest("Invalid token.");
+            principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+            ??
+            principal.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email)?.Value;
+
+        if (string.IsNullOrWhiteSpace(email))
+            return Unauthorized("Invalid token.");
 
         var user = await _context.Users
-            .FirstOrDefaultAsync(x => x.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null)
             return Unauthorized();
 
         if (user.RefreshToken != request.RefreshToken)
-            return Unauthorized();
+            return Unauthorized("Invalid Refresh Token.");
 
         if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            return Unauthorized("Refresh token expired.");
+            return Unauthorized("Refresh Token expired.");
 
-        var newAccessToken = _jwtService.GenerateToken(user);
+        var newAccessToken =
+            _jwtService.GenerateToken(user);
 
-        var newRefreshToken = _jwtService.GenerateRefreshToken();
+        var newRefreshToken =
+            _jwtService.GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime =
+            DateTime.UtcNow.AddDays(7);
 
         await _context.SaveChangesAsync();
 
         return Ok(new AuthResponseDto
         {
-            Token = newAccessToken,
+            AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
             Email = user.Email,
             Role = user.Role,
             Expiration = DateTime.UtcNow.AddHours(2)
         });
-
-
-
     }
 
     // POST: api/Auth/reset-password
@@ -382,7 +389,6 @@ public class AuthController : ControllerBase
         var email =
     User.FindFirst(ClaimTypes.Email)?.Value ??
     User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
-
         if (string.IsNullOrEmpty(email))
             return Unauthorized();
 

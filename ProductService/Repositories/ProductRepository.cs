@@ -100,9 +100,24 @@ public class ProductRepository
     }
     public override async Task<Product?> GetByIdAsync(int id)
     {
-        return await _context.Products
+        Console.WriteLine($"Searching Product Id = {id}");
+
+        var product = await _context.Products
+            .IgnoreQueryFilters()
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+        {
+            Console.WriteLine("PRODUCT = NULL");
+        }
+        else
+        {
+            Console.WriteLine($"FOUND PRODUCT: {product.Id} - {product.Name}");
+            Console.WriteLine($"Category = {product.Category?.Name}");
+        }
+
+        return product;
     }
 
 

@@ -40,5 +40,7 @@ namespace ProductService.Models
         public int AccessFailedCount { get; set; }
 
         public DateTime? LockoutEnd { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
+    = new List<RefreshToken>();
     }
 }

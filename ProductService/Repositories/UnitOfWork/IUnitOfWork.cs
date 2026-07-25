@@ -32,4 +32,7 @@ public interface IUnitOfWork : IDisposable
 
     Task RollbackTransactionAsync();
 
+    // Added
+    Task ExecuteInTransactionAsync(Func<Task> operation);
+
 }

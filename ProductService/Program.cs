@@ -28,8 +28,10 @@ using ProductService.Repositories;
 using ProductService.Repositories.Generic;
 using ProductService.Repositories.UnitOfWork;
 using ProductService.Services;
+using ProductService.Services.Cache;
 using ProductService.Validators;
 using Serilog;
+using StackExchange.Redis;
 using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -123,10 +125,7 @@ builder.Services.AddDbContext<ProductDbContext>((serviceProvider, options) =>
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ProductDbContext>("SQL Server");
 
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration["Redis:ConnectionString"];
-});
+
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -150,7 +149,7 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 });
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHangfire(config =>
@@ -302,6 +301,7 @@ builder.Services.AddAuthorization(options =>
     // Audit
     options.AddPolicy(Permissions.AuditView,
         policy => policy.Requirements.Add(new PermissionRequirement(Permissions.AuditView)));
+    
 });
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -330,9 +330,27 @@ builder.Services.AddRateLimiter(options =>
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration =
+        builder.Configuration.GetConnectionString("Redis");
+});
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration =
+        ConfigurationOptions.Parse(
+            builder.Configuration.GetConnectionString("Redis")!);
+
+    configuration.AbortOnConnectFail = false;
+
+    return ConnectionMultiplexer.Connect(configuration);
+});
+
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -363,6 +381,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+
+app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseMiddleware<SwaggerBasicAuthMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -371,21 +397,17 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Catalog API v1");
         c.RoutePrefix = "swagger";
+
     });
+    app.UseAuthentication();
+    app.UseAuthorization();
+
 }
-
-
-app.UseStaticFiles();
-
-app.UseHttpsRedirection();
-
 app.UseRateLimiter();
 
 app.UseCors("AllowAll");
 
-app.UseAuthentication();
-
-
+app.MapControllers();
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = new[]
@@ -393,17 +415,9 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
         new ProductService.Authorization.HangfireDashboardAuthorizationFilter()
     }
 });
+app.MapHangfireDashboard();
 
-app.UseAuthorization();
-
-app.MapControllers();
 app.MapHealthChecks("/health");
 
 #endregion
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
-
-    db.Database.Migrate();
-}
 app.Run();

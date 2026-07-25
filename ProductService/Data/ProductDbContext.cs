@@ -19,6 +19,7 @@ namespace ProductService.Data
         public DbSet<Wishlist> Wishlists => Set<Wishlist>();
 
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -63,6 +64,10 @@ namespace ProductService.Data
             modelBuilder.Entity<Wishlist>()
                 .HasIndex(w => new { w.UserId, w.ProductId })
                 .IsUnique();
+            modelBuilder.Entity<RefreshToken>()
+    .HasOne(r => r.User)
+    .WithMany(u => u.RefreshTokens)
+    .HasForeignKey(r => r.UserId);
         }
     }
 }
