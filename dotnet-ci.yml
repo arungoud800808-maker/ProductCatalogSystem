@@ -11,15 +11,13 @@ on:
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
@@ -34,19 +32,25 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Build Docker Image
-        run: docker build -t productcatalogapi -f ProductService/Dockerfile .
+        run: |
+          docker build -t productcatalogapi -f ProductService/Dockerfile .
+
+      - name: Show Docker Username
+        run: |
+          echo "Docker Username: ${{ secrets.DOCKER_USERNAME }}"
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-        continue-on-error: true
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Tag Docker Image
-        if: success()
-        run: docker tag productcatalogapi ${{ secrets.DOCKER_USERNAME }}/productcatalogapi:latest
+        run: |
+          docker tag productcatalogapi ${{ secrets.DOCKER_USERNAME }}/productcatalogapi:latest
 
       - name: Push Docker Image
-        if: success()
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/productcatalogapi:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/productcatalogapi:latest
+
+      - name: Logout Docker
+        if: always()
+        run: docker logout
